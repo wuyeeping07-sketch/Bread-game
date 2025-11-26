@@ -82,14 +82,14 @@ button:active {
     border-radius: 20px;
     position: relative; /* 用於定位拖入的食材 */
 }
-
-/* 基礎麵包樣式 (之後會替換為您的嘉頓麵包圖案) */
 #base-bread {
     width: 250px;
     height: 250px;
-    background-color: #ffd700; /* 暫時用金黃色表示麵包體 */
+    /* 這裡可以移除任何可能干擾圖片載入的背景色或邊框 */
+    background-color: transparent; /* 確保它是透明的 */
     border: 5px solid #8b4513;
-    border-radius: 50%; /* 暫時做成圓形麵包 */
+    border-radius: 50%;
+    /* ... 保持 position: relative */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -123,7 +123,7 @@ button:active {
 }
 
 /* ----------------------------------- */
-/* 進階樣式：麵包圖片、放置的食材與 HUD */
+/* 4. 進階樣式：麵包圖片、放置的食材與 HUD */
 /* ----------------------------------- */
 #bread-image {
     width: 100%;
@@ -141,88 +141,97 @@ button:active {
     font-weight: bold;
     cursor: move;
     box-shadow: 2px 2px 0px 0px #4a2c00;
-    pointer-events: auto;
+    pointer-events: auto; /* 允許點擊和拖曳 */
 }
 
+/* 訂單顯示樣式 - 新增和修正 */
 #order-display {
     margin-bottom: 10px;
 }
 
-.hud {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.hud .item {
-    background: #fff8dc;
-    border: 2px solid #ff6347;
-    padding: 6px 10px;
-    border-radius: 12px;
-    box-shadow: 3px 3px 0 #4a2c00;
-    font-weight: bold;
+#order-display h2 {
+    color: #cc0000; /* 訂單標題用紅色強調 */
 }
 
 .order-list {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
 }
 
-.order-ingredient {
-    background: #ffa07a;
-    padding: 6px 10px;
-    border-radius: 8px;
-    color: white;
-    border: 2px solid #4a2c00;
+.order-item {
+    padding: 8px 15px;
+    border-radius: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: 3px solid #4a2c00;
+    box-shadow: 3px 3px 0px 0px #4a2c00;
 }
-/* --- [新增到 style.css 檔案尾部] --- */
+
+.order-item.required {
+    background-color: #ff9999; /* 必須：柔和的紅色背景 */
+    color: #4a2c00;
+}
+
+.order-item.optional {
+    background-color: #99ccff; /* 可選：柔和的藍色背景 */
+    color: #4a2c00;
+}
+
+/* ----------------------------------- */
+/* 5. 畫廊區塊樣式 (舞台) - 整合修正 */
+/* ----------------------------------- */
 
 #gallery-area {
-    /* 增加邊距和內邊距，使舞台更寬敞 */
     margin: 40px auto; 
     padding: 50px; 
-    max-width: 900px; /* 限制寬度，讓它在頁面中央突出 */
+    max-width: 900px; 
     
-    /* 顏色和邊框：強調舞台的華麗感 */
-    background-color: #fffaf0; /* 奶油白色，像光打在背景上 */
+    background-color: #fffaf0; /* 奶油白色 */
     border: 10px solid #ffcc00; /* 金色粗邊框 */
     border-radius: 30px;
     
-    /* 陰影：製造舞台的厚重感和立體感 */
-    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4), /* 底部陰影 */
-                inset 0 0 20px rgba(255, 215, 0, 0.5); /* 內部光暈，模擬聚光燈 */
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4), 
+                inset 0 0 20px rgba(255, 215, 0, 0.5); 
     
     text-align: center;
-    /* 過渡效果 */
     transition: all 0.5s ease-in-out; 
 }
 
 #gallery-area h2 {
-    color: #8b4513; /* 咖啡色標題 */
-    font-size: 2.5em; /* 放大標題 */
+    color: #8b4513; 
+    font-size: 2.5em; 
     margin-bottom: 30px;
-    text-shadow: 2px 2px 0px #fff; /* 讓文字更突出 */
+    text-shadow: 2px 2px 0px #fff; 
 }
 
-/* 作品卡片樣式：讓每個作品像放在展示架上 */
+/* 新增：畫廊作品列表佈局 */
+#creation-list {
+    display: flex;
+    flex-wrap: wrap; /* 允許作品換行 */
+    justify-content: center; /* 作品居中顯示 */
+    gap: 30px; /* 作品卡片間的間距 */
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+/* 作品卡片樣式 */
 .saved-creation {
-    background-color: #f0f0f0; /* 淺灰色底座 */
-    border: 5px solid #d3d3d3; /* 灰色邊框 */
-    border-bottom: 10px solid #a9a9a9; /* 加厚底部，像一個底座 */
+    background-color: #f0f0f0; 
+    border: 5px solid #d3d3d3; 
+    border-bottom: 10px solid #a9a9a9; 
     border-radius: 10px;
     padding: 20px;
     width: 280px;
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); /* 提升陰影深度 */
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); 
     position: relative;
     transition: transform 0.3s;
 }
 
 .saved-creation:hover {
-    transform: translateY(-5px) scale(1.03); /* 滑鼠懸停時微抬起，更像展示品 */
+    transform: translateY(-5px) scale(1.03); 
 }
 
 
@@ -232,7 +241,7 @@ button:active {
     margin: 10px auto;
     border: 2px solid gray;
     border-radius: 10px;
-    position: relative; /* 關鍵：用於定位複製的食材 */
+    position: relative; 
     overflow: hidden;
     /* 這裡可以放一個縮小版的嘉頓麵包背景 */
     background: url('garden_bread.png') center / contain no-repeat;
@@ -243,37 +252,54 @@ button:active {
     font-size: 0.9em;
     padding: 8px 15px;
 }
-/* --- [新增到 style.css 檔案尾部] --- */
 
-#leaderboard-area {
-    padding: 30px;
-    background-color: #add8e6; /* 淺藍色，代表獎牌和榮譽 */
-    border: 5px solid #ffcc00; /* 金色邊框 */
-    border-radius: 20px;
-    margin-top: 30px;
+/* ----------------------------------- */
+/* 6. 響應式調整 (手機適用) */
+/* ----------------------------------- */
+@media (max-width: 768px) {
+    #game-container {
+        padding: 15px;
+        border-radius: 15px;
+        /* 避免遊戲區塊溢出 */
+        min-width: 0;
+    }
+
+    /* 確保在小螢幕上，工作檯和食材櫃可以垂直堆疊 */
+    #game-area {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    /* 縮小麵包尺寸 */
+    #base-bread {
+        width: 200px;
+        height: 200px;
+    }
+
+    /* 縮小按鈕 */
+    button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    
+    /* 讓畫廊作品在小螢幕上完整顯示 */
+    .saved-creation {
+        width: 100%; 
+        max-width: 280px; 
+    }
+    
+    .order-item {
+        font-size: 0.9em;
+        padding: 6px 10px;
+    }
 }
-
-#rank-list {
-    list-style: none; /* 移除預設的數字 */
-    padding: 0;
-    margin-top: 20px;
-}
-
-#rank-list li {
-    background-color: #fff;
-    padding: 10px 20px;
-    margin: 8px 0;
-    border-radius: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #4a2c00;
+.creation-concept {
+    font-size: 0.9em;
+    color: #4a4a4a;
+    background-color: #ffe0b2; /* 柔和的橘色背景 */
+    padding: 8px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px dashed #d38936;
     text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 2px 2px 0px 0px #008080;
 }
-
-#rank-list li:nth-child(1) { background-color: #ffd700; } /* 金牌 */
-#rank-list li:nth-child(2) { background-color: #c0c0c0; } /* 銀牌 */
-#rank-list li:nth-child(3) { background-color: #cd7f32; } /* 銅牌 */
