@@ -1,4 +1,4 @@
-// --- [script.js: 最終功能整合版本] ---
+// --- [script.js: 最終功能整合版本 - 已修正創作模式清空問題] ---
 
 // -----------------------------------
 // 1. DOM 元素選取與狀態變數
@@ -18,21 +18,28 @@ const galleryArea = document.getElementById('gallery-area');
 const creationList = document.getElementById('creation-list');
 const backFromGalleryBtn = document.getElementById('back-from-gallery');
 const orderDisplay = document.getElementById('order-display'); 
+const exportCreationsBtn = document.getElementById('export-creations-btn'); // 匯出按鈕
+// --- [script.js: 1. DOM 元素選取與狀態變數] ---
 
-// 遊戲狀態變數
+// 新增 HUD 元素
+const scoreDisplay = document.getElementById('score-display');
+const livesDisplay = document.getElementById('lives-display');
+const timerDisplay = document.getElementById('timer-display');
+
+// 遊戲狀態變數 (保留不變)
 let currentMode = null; 
 let droppedIdCounter = 0;
 const STORAGE_KEY = 'breadCreations'; // 畫廊儲存鍵
 
-// 顧客模式變數
+// 顧客模式變數 (新增計時器變數)
 let score = 0;
 let lives = 3;
-let orderTimer = null;
-let orderTimeLeft = 0;
-let currentOrder = [];
-const ORDER_TIME = 25; // seconds per order
-
-// 所有可用食材 (這裡需要與您的 HTML 食材列表保持一致)
+let orderTimer = null; // 計時器 ID
+let orderTimeLeft = 0; // 剩餘時間
+let currentOrder = null;
+const ORDER_TIME = 25; // 每筆訂單的時間 (秒) 
+// ...
+// 所有可用食材 (與您的 HTML 列表匹配)
 const ALL_INGREDIENTS = [
     { name: 'Cheese', icon: '🧀', label: '起司' },
     { name: 'Tomato', icon: '🍅', label: '番茄' },
@@ -56,42 +63,65 @@ const ALL_INGREDIENTS = [
     { name: 'peanut_butter', icon: '🥜', label: '花生醬' }
 ];
 
-// 顧客訂單範例 (需要與您的 ALL_INGREDIENTS 匹配)
+// 顧客訂單範例
 const SAMPLE_ORDERS = [
-    { name: '經典火腿起司', required: ['Ham', 'Cheese'], optional: [] },
+    { name: '經典火腿起司', required: ['Ham', 'Cheese'], optional: ['Lettuce'] },
     { name: '水果甜心', required: ['strawberry', 'Blueberry'], optional: ['whipped_cream'] },
     { name: '巧克力香蕉堡', required: ['Chocolate', 'banana'], optional: ['honey'] },
 ];
 
 
-// -----------------------------------
-// 2. 核心功能：初始化與切換
-// -----------------------------------
+// --- [script.js: initializeBreadBase 最終修正版] ---
 
 /**
  * 初始化麵包基底圖案
  */
+// --- [script.js: initializeBreadBase 最終測試版] ---
 function initializeBreadBase() {
-    baseBread.innerHTML = '';
-    const breadImage = document.createElement('img');
-    breadImage.src = 'garden_bread.png';
-    breadImage.alt = '麵包基底';
-    breadImage.id = 'bread-image';
-    breadImage.style.width = '100%'; 
-    breadImage.style.height = 'auto';
-    breadImage.style.objectFit = 'contain';
-    baseBread.appendChild(breadImage);
+    const existingImage = document.getElementById('bread-image');
+    if (existingImage) {
+        existingImage.remove();
+    }
+
+    baseBread.style.position = 'relative'; 
     baseBread.style.backgroundColor = 'transparent';
     baseBread.style.border = 'none';
-}
 
-/**
- * 清空工作檯上的食材
- */
+    // 確保容器有明確的尺寸
+    baseBread.style.width = '250px'; 
+    baseBread.style.height = '250px';
+
+    // !!! 測試點：使用一個確定的公共圖片 URL !!!
+    // 這個圖片應該是能載入的。
+    const TEST_IMAGE_URL = 'https://i.imgur.com/GzB04oU.png'; // 一個圓形麵包圖片
+
+    baseBread.style.backgroundImage = `url("${TEST_IMAGE_URL}")`; 
+    baseBread.style.backgroundSize = 'contain';
+    baseBread.style.backgroundRepeat = 'no-repeat';
+    baseBread.style.backgroundPosition = 'center';
+}
+// --- [結束測試版] ---
+
+
+
 function clearCraftingArea() {
     const dropped = baseBread.querySelectorAll('.dropped-ingredient');
     dropped.forEach(d => d.remove());
 }
+
+/**
+ * 處理生命值歸零後的遊戲結束流程
+ */
+function gameOver() {
+    // 這裡可以停止計時器 (如果有的話)
+    // if (orderTimer) stopOrderTimer(); 
+
+    alert(`遊戲結束！您的生命歸零了。\n最終分數：${score} 分。`);
+    
+    // 返回主選單
+    goToMenu();
+}
+
 
 /**
  * 返回選單：隱藏所有遊戲區塊，只顯示主選單
@@ -103,6 +133,7 @@ function goToMenu() {
     gameArea.classList.add('hidden');
     galleryArea.classList.add('hidden'); 
     
+    // 只有在返回選單時才清空工作檯
     clearCraftingArea(); 
     
     // 最後顯示主選單
@@ -114,37 +145,47 @@ function goToMenu() {
  */
 function startGame(mode) {
     currentMode = mode;
-    
+
     levelSelection.classList.add('hidden');
     gameArea.classList.remove('hidden');
     setupDragAndDrop();
 
     if (mode === 'customer') {
+        // 顧客模式：重新初始化並清空，準備新訂單
         score = 0;
         lives = 3;
-        // 使用更簡單的 generateNewOrder 函數 (因為您的原始 generateOrder 較複雜)
-        generateNewOrder(); 
+        // HUD 初始化
+        scoreDisplay.textContent = score; 
+        livesDisplay.textContent = lives; 
+
+        initializeBreadBase(); 
+        clearCraftingArea(); 
+        generateNewOrder();
         finishCraftingBtn.textContent = '✅ 完成出餐';
-        finishCraftingBtn.onclick = checkCustomerOrder; 
+        finishCraftingBtn.onclick = finishAction; 
         finishCraftingBtn.disabled = false;
     } else { // 'creation' mode
+        // 創作模式：不強制清空，讓使用者繼續修改
         orderDisplay.innerHTML = '<h2>✨ 自由創作時間！</h2><p>隨心所欲地搭配食材吧！完成後可以展示您的作品。</p>';
         finishCraftingBtn.textContent = '🖼️ 展示作品';
-        finishCraftingBtn.onclick = handleCreationFinish; 
+        finishCraftingBtn.onclick = finishAction; 
         finishCraftingBtn.disabled = false;
+        
+        // 確保基底存在
+        if (!baseBread.querySelector('#bread-image')) {
+            initializeBreadBase();
+        }
     }
-    initializeBreadBase();
-    clearCraftingArea();
 }
 
 /**
- * 顯示畫廊並加載所有已保存的作品 (這是您點擊按鈕的目標函數)
+ * 顯示畫廊並加載所有已保存的作品
  */
 function showGallery() {
-    // 步驟 1: 隱藏所有工作區，切換到畫廊
-    goToMenu(); 
-    levelSelection.classList.add('hidden'); // 確保選單被隱藏
-
+    // 隱藏選單和遊戲區
+    levelSelection.classList.add('hidden'); 
+    gameArea.classList.add('hidden');
+    
     // 顯示畫廊區塊
     galleryArea.classList.remove('hidden'); 
 
@@ -164,18 +205,19 @@ function showGallery() {
         
         card.innerHTML = `
             <h3>${creation.name}</h3>
-            <div class="creation-canvas" id="canvas-${index}"></div>
+            <p class="creation-concept">**理念：** ${creation.concept || '無'}</p>  <div class="creation-canvas" id="canvas-${index}"></div>
             <button onclick="deleteCreation(${index})">🗑️ 刪除作品</button>
         `;
         creationList.appendChild(card);
         
         renderCreationCanvas(`canvas-${index}`, creation.ingredients);
     });
+
 }
 
 
 // -----------------------------------
-// 3. 顧客模式邏輯 (簡化)
+// 3. 顧客模式邏輯 (包含評分懲罰)
 // -----------------------------------
 
 function generateNewOrder() {
@@ -201,21 +243,23 @@ function generateNewOrder() {
             ${optionalHtml}
         </div>
     `;
-    // 啟動計時器 (如果需要)
-    // startOrderTimer(); 
+startOrderTimer(); // <-- 新增
 }
 
+/**
+ * 檢查玩家製作的麵包是否符合當前顧客的需求，並更新分數/生命
+ */
 function checkCustomerOrder() {
+    stopOrderTimer(); //
     if (!currentOrder) return alert("錯誤：沒有找到當前訂單！");
 
-    // 1. 獲取玩家使用的所有食材名稱
     const droppedIngredients = baseBread.querySelectorAll('.dropped-ingredient');
     const playerIngredients = new Set(); 
     droppedIngredients.forEach(ing => {
         playerIngredients.add(ing.getAttribute('data-name'));
     });
     
-    // 2. 檢查必須的食材是否都在麵包上
+    // 1. 檢查缺少必須的食材
     let missingRequired = [];
     currentOrder.required.forEach(req => {
         if (!playerIngredients.has(req)) {
@@ -223,7 +267,7 @@ function checkCustomerOrder() {
         }
     });
 
-    // 3. 檢查是否有放錯的食材 (既非必須也非可選的)
+    // 2. 檢查多放了不該放的食材
     let extraIngredients = [];
     const allowedIngredients = new Set([...currentOrder.required, ...currentOrder.optional]);
 
@@ -233,62 +277,93 @@ function checkCustomerOrder() {
         }
     });
     
-    // 4. 判斷結果，更新分數/生命
-    let scoreChange = 0; // 這次訂單獲得或失去的分數
-    let lifeChange = 0;  // 這次訂單生命值的變化
+    // 3. 判斷結果，更新分數/生命
+    let scoreChange = 0; 
+    let lifeChange = 0;  
     let message = '';
 
     if (missingRequired.length === 0 && extraIngredients.length === 0) {
-        // 完美達成
-        scoreChange = 10; // 每個訂單給予固定分數
+        scoreChange = 10; 
         message = '🎉 完美！顧客非常滿意！';
     } else if (missingRequired.length > 0) {
-        // 缺少必須的食材 -> 嚴重錯誤，扣分扣生命
         lifeChange = -1;
         scoreChange = 0; 
         const missingLabels = missingRequired.map(name => ALL_INGREDIENTS.find(i => i.name === name).label).join('、');
         message = `⚠️ 嚴重錯誤！您缺少了必須的食材：**${missingLabels}**。(-1 生命)`;
     } else if (extraIngredients.length > 0) {
-        // 多放了不該放的食材 -> 輕微錯誤，扣分或不給分
-        lifeChange = -1; // 輕微錯誤，也扣生命
+        lifeChange = -1; 
         scoreChange = 0;
-        const extraLabels = extraIngredients.map(name => ALL_INGREDIENTS.find(i => i.name === name).label).join('、');
+        const extraLabels = extraIngredients.map(name => ALL_INGREVEDIENTS.find(i => i.name === name).label).join('、');
         message = `💡 錯誤！您多放了 **${extraLabels}**。顧客不喜歡這個！(-1 生命)`;
     } else {
-        // 應付複雜情況，確保有一個默認行為
         scoreChange = 5; 
         message = '👍 達成基本要求，表現不錯！';
     }
     
-    // 5. 更新遊戲狀態
+    // 4. 更新遊戲狀態
     score += scoreChange;
     lives += lifeChange;
-    
+    scoreDisplay.textContent = score; // <-- 更新分數顯示
+    livesDisplay.textContent = lives; // <-- 更新生命顯示
+
     alert(`【出餐結果】\n分數變化：${scoreChange} 分\n生命變化：${lifeChange} 點\n\n${message}\n\n當前生命：${lives} 點`);
 
-    // 6. 檢查是否遊戲結束或準備下一回合
-    if (lives <= 0) {
+    // 5. 檢查是否遊戲結束或準備下一回合
+  if (lives <= 0) {
         gameOver();
     } else {
         clearCraftingArea();
         generateNewOrder(); // 準備下一個訂單
     }
-    // --- [新增到 script.js 的任意空白處] ---
+}
 
-function gameOver() {
-    // 這裡可以停止計時器 (如果有的話)
-    // if (orderTimer) stopOrderTimer(); 
+// --- [script.js: 新增 計時器核心函數] ---
 
-    alert(`遊戲結束！您的生命歸零了。\n最終分數：${score} 分。`);
+/**
+ * 停止計時器 (用於出餐或時間到)
+ */
+function stopOrderTimer() {
+    if (orderTimer) {
+        clearInterval(orderTimer);
+        orderTimer = null;
+    }
+}
+
+/**
+ * 更新計時器顯示，並檢查時間是否用盡
+ */
+function updateTimer() {
+    orderTimeLeft--;
+    timerDisplay.textContent = orderTimeLeft;
     
-    // 返回主選單
-    goToMenu();
+    // 如果時間歸零
+    if (orderTimeLeft <= 0) {
+        stopOrderTimer();
+        lives--; // 時間用盡扣除生命
+        livesDisplay.textContent = lives;
+        
+        alert(`⏰ 時間到！顧客等太久不耐煩地走了。(-1 生命)`);
+        
+        if (lives <= 0) {
+            gameOver();
+        } else {
+            clearCraftingArea();
+            generateNewOrder(); // 進入下一張訂單
+        }
+    }
 }
 
-// --- [結束新增] ---
+/**
+ * 啟動新的訂單計時器
+ */
+function startOrderTimer() {
+    stopOrderTimer(); // 確保先停止舊的計時器
+    orderTimeLeft = ORDER_TIME;
+    timerDisplay.textContent = orderTimeLeft;
+    orderTimer = setInterval(updateTimer, 1000); // 每秒更新一次
 }
 
-// --- [結束替換] ---
+
 // -----------------------------------
 // 4. 創作畫廊邏輯
 // -----------------------------------
@@ -301,6 +376,11 @@ function getSavedCreations() {
 /**
  * 處理自由創作模式下的「展示作品」按鈕點擊
  */
+// --- [script.js: 修正 handleCreationFinish 函數] ---
+
+/**
+ * 處理自由創作模式下的「展示作品」按鈕點擊
+ */
 function handleCreationFinish() {
     const droppedIngredients = baseBread.querySelectorAll('.dropped-ingredient');
     
@@ -309,11 +389,17 @@ function handleCreationFinish() {
         return;
     }
 
+    const name = prompt("請為您的麵包作品命名：") || `無名傑作 ${Date.now()}`;
+    // 新增：收集作品理念
+    const concept = prompt("請為您的作品填寫製作理念（例如：靈感來源、口味搭配）：") || '沒有特別的製作理念。';
+
     const creationData = {
-        name: prompt("請為您的麵包作品命名：") || `無名傑作 ${Date.now()}`,
+        name: name,
+        concept: concept, // <-- 新增：儲存理念
         ingredients: []
     };
-
+    
+    // 儲存食材數據
     droppedIngredients.forEach(ing => {
         creationData.ingredients.push({
             name: ing.getAttribute('data-name'),
@@ -326,12 +412,41 @@ function handleCreationFinish() {
     savedCreations.push(creationData);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedCreations));
     
-    alert(`🎉 您的作品「${creationData.name}」已成功保存！`);
+    alert(`🎉 您的作品「${creationData.name}」已成功保存！\n理念：${creationData.concept}`);
     
-    // 切換到畫廊
+    // 1. 隱藏遊戲區 (創作頁面)
+    gameArea.classList.add('hidden');
+    
+    // 2. 顯示畫廊 (畫廊/舞台)
+    galleryArea.classList.remove('hidden');
+
+    // 3. 重新載入畫廊列表
     showGallery(); 
 }
+// --- [結束修正] ---
+function exportCreations() {
+    const savedCreations = getSavedCreations();
+    
+    if (savedCreations.length === 0) {
+        alert("目前沒有任何作品可以匯出！");
+        return;
+    }
 
+    const jsonOutput = JSON.stringify(savedCreations, null, 2);
+
+    const exportWindow = window.open("", "作品數據匯出", "width=600,height=400");
+    exportWindow.document.write('<html><head><title>作品數據匯出</title></head><body>');
+    exportWindow.document.write('<h2>請複製以下數據：</h2>');
+    exportWindow.document.write('<p>將此文本保存為 .json 檔案即可匯入。</p>');
+    exportWindow.document.write('<textarea rows="15" cols="70" style="resize: none;">' + jsonOutput + '</textarea>');
+    exportWindow.document.write('</body></html>');
+    exportWindow.document.close();
+}
+
+
+/**
+ * 渲染單個創作 (縮小版)
+ */
 /**
  * 渲染單個創作 (縮小版)
  */
@@ -339,8 +454,16 @@ function renderCreationCanvas(canvasId, ingredients) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     
-    canvas.style.width = '150px'; 
-    canvas.style.height = '150px';
+    // 原始工作檯尺寸 (來自 CSS #base-bread)
+    const ORIGINAL_BREAD_SIZE = 250; 
+    // 畫廊展示畫布尺寸 (來自下方的 style 設定)
+    const GALLERY_CANVAS_SIZE = 150; 
+    // 計算縮放比例：150 / 250 = 0.6
+    const scaleFactor = GALLERY_CANVAS_SIZE / ORIGINAL_BREAD_SIZE;
+    
+    // 確保 canvas 尺寸設定與計算比例一致
+    canvas.style.width = `${GALLERY_CANVAS_SIZE}px`; 
+    canvas.style.height = `${GALLERY_CANVAS_SIZE}px`;
     canvas.style.margin = '10px auto';
     canvas.style.position = 'relative';
     canvas.style.backgroundImage = 'url("garden_bread.png")'; 
@@ -353,17 +476,26 @@ function renderCreationCanvas(canvasId, ingredients) {
         newIngredient.textContent = item ? item.icon : ingData.name;
         newIngredient.classList.add('dropped-ingredient');
         
-        newIngredient.style.position = 'absolute';
-        newIngredient.style.left = ingData.left;
-        newIngredient.style.top = ingData.top;
+        // 修正：將儲存的座標值 (e.g. '200px') 轉換為數字，並乘以縮放比例
+        const originalLeft = parseFloat(ingData.left);
+        const originalTop = parseFloat(ingData.top);
         
-        newIngredient.style.transform = 'scale(0.35)'; 
-        newIngredient.style.padding = '0';
-        newIngredient.style.backgroundColor = 'transparent';
-        newIngredient.style.border = 'none';
+        const scaledLeft = originalLeft * scaleFactor;
+        const scaledTop = originalTop * scaleFactor;
 
-        canvas.appendChild(newIngredient);
-    });
+        newIngredient.style.position = 'absolute';
+    // 使用縮放後的座標值
+    newIngredient.style.left = `${scaledLeft}px`; 
+    newIngredient.style.top = `${scaledTop}px`;
+    
+    // 關鍵修正點：將縮放比例從 0.35 增加到 0.6 (或您喜歡的任何值)
+    newIngredient.style.transform = 'scale(0.8)'; // <-- 放大標誌
+    newIngredient.style.padding = '0';
+    newIngredient.style.backgroundColor = 'transparent';
+    newIngredient.style.border = 'none';
+
+    canvas.appendChild(newIngredient);
+});
 }
 
 /**
@@ -380,7 +512,7 @@ function deleteCreation(index) {
 
 
 // -----------------------------------
-// 5. 拖曳功能 (簡化您的原始程式碼)
+// 5. 拖曳功能
 // -----------------------------------
 
 function setupDragAndDrop() {
@@ -405,10 +537,9 @@ function originalIngredientDragStart(e) {
 
 function baseBreadDrop(e) {
     e.preventDefault();
-    // 檢查是否為移動現有元素 (省略移動邏輯)
+    // 移動現有元素邏輯
     const elementId = e.dataTransfer.getData('text/elementId');
     if (elementId) {
-        // 處理移動現有元素
         const moving = document.getElementById(elementId);
         if (moving) {
             const breadRect = baseBread.getBoundingClientRect();
@@ -456,32 +587,40 @@ function ingredientsAreaDrop(e) {
     }
 }
 
+// 6. 完成動作 (分流顧客/創作模式)
+function finishAction() {
+    if (currentMode === 'customer') {
+        checkCustomerOrder();
+    } else if (currentMode === 'creation') {
+        handleCreationFinish();
+    }
+}
+
 
 // -----------------------------------
-// 6. 最終事件監聽器 (修復切換邏輯)
+// 7. 最終事件監聽器
 // -----------------------------------
-
-// --- [替換 script.js 底部 DOMContentLoaded 區塊] ---
 
 document.addEventListener('DOMContentLoaded', () => {
     // 點擊「顧客需求出餐」，進入遊戲模式
     modeCustomerBtn.addEventListener('click', () => startGame('customer'));
     
-    // **修正:** 點擊「自由創作展示」，進入創作模式 (startGame('creation'))
+    // 點擊「自由創作展示」，進入創作模式
     modeCreationBtn.addEventListener('click', () => startGame('creation')); 
     
-    // 返回選單按鈕
+    // 返回選單按鈕 (遊戲中)
     backToMenuBtn.addEventListener('click', goToMenu);
     
     // 從畫廊返回選單按鈕
     backFromGalleryBtn.addEventListener('click', goToMenu); 
     
-    // 遊戲中的完成按鈕 ( finishAction 會根據 currentMode 決定呼叫 checkCustomerOrder 還是 handleCreationFinish)
+    // 畫廊匯出按鈕
+    exportCreationsBtn.addEventListener('click', exportCreations);
+    
+    // 遊戲中的完成按鈕
     finishCraftingBtn.addEventListener('click', finishAction);
     
     // 初始載入
     initializeBreadBase();
     setupDragAndDrop();
 });
-
-// --- [script.js: DOMContentLoaded 修正完成] ---
