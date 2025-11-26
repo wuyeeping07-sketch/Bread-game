@@ -1,0 +1,279 @@
+/* ----------------------------------- */
+/* 1. 全局和基礎樣式 (模擬童趣和蠟筆感) */
+/* ----------------------------------- */
+body {
+    font-family: 'Comic Sans MS', 'Crayon Hand', cursive, sans-serif; /* 嘗試使用童趣字體 */
+    background: #f7e8a9; /* 柔和的淡黃色背景，像圖畫紙 */
+    color: #4a2c00; /* 深棕色文字，模擬蠟筆或鉛筆 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#game-container {
+    background: #ffffff; /* 遊戲區塊使用白色底，像畫布 */
+    border: 5px solid #ff6347; /* 粗粗的紅色邊框，模擬手繪線條 */
+    border-radius: 30px; /* 大大的圓角，增加童趣感 */
+    box-shadow: 10px 10px 0px 0px #4a2c00; /* 模擬手繪的粗黑邊陰影 */
+    padding: 40px;
+    text-align: center;
+    max-width: 900px;
+    width: 100%;
+}
+
+h1, h2 {
+    color: #008080; /* 使用明亮的青色標題 */
+    text-shadow: 3px 3px 0px #ffe4b5; /* 增加淺色陰影，模擬立體蠟筆效果 */
+    margin-bottom: 20px;
+}
+
+/* ----------------------------------- */
+/* 2. 按鈕樣式 (可愛、可點擊的蠟筆方塊) */
+/* ----------------------------------- */
+button {
+    background-color: #ffcc00; /* 鮮豔的黃色 */
+    color: #4a2c00;
+    border: 3px solid #ff6347; /* 鮮紅邊框 */
+    border-radius: 15px;
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    box-shadow: 5px 5px 0px 0px #4a2c00; /* 手繪感陰影 */
+}
+
+button:hover {
+    background-color: #ffaa00;
+    transform: translateY(-2px); /* 輕微上浮的互動效果 */
+    box-shadow: 7px 7px 0px 0px #4a2c00;
+}
+
+button:active {
+    transform: translateY(3px); /* 按下時的下沉效果 */
+    box-shadow: 2px 2px 0px 0px #4a2c00;
+}
+
+/* ----------------------------------- */
+/* 3. 遊戲區塊佈局和食材樣式 */
+/* ----------------------------------- */
+#game-area {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+#crafting-area {
+    width: 100%;
+    min-height: 350px;
+    border: 4px dashed #90ee90; /* 虛線邊框，像一個創作區域 */
+    padding: 20px;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fffacd; /* 淺黃色工作檯面 */
+    border-radius: 20px;
+    position: relative; /* 用於定位拖入的食材 */
+}
+
+/* 基礎麵包樣式 (之後會替換為您的嘉頓麵包圖案) */
+#base-bread {
+    width: 250px;
+    height: 250px;
+    background-color: #ffd700; /* 暫時用金黃色表示麵包體 */
+    border: 5px solid #8b4513;
+    border-radius: 50%; /* 暫時做成圓形麵包 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+#ingredients-area {
+    width: 100%;
+    padding: 15px;
+    border-top: 3px solid #ff6347;
+    text-align: center;
+}
+
+.ingredient {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 8px;
+    background-color: #9370db; /* 紫色背景，讓食材突出 */
+    color: white;
+    border-radius: 10px;
+    border: 2px solid #4a2c00;
+    cursor: grab; /* 鼠標變成抓取圖標 */
+    font-weight: bold;
+    box-shadow: 2px 2px 0px 0px #4a2c00;
+}
+
+/* 隱藏元素 */
+.hidden {
+    display: none !important;
+}
+
+/* ----------------------------------- */
+/* 進階樣式：麵包圖片、放置的食材與 HUD */
+/* ----------------------------------- */
+#bread-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+}
+
+.dropped-ingredient {
+    position: absolute;
+    padding: 6px 10px;
+    background-color: rgba(255,255,255,0.85);
+    border-radius: 14px;
+    border: 2px solid #4a2c00;
+    font-weight: bold;
+    cursor: move;
+    box-shadow: 2px 2px 0px 0px #4a2c00;
+    pointer-events: auto;
+}
+
+#order-display {
+    margin-bottom: 10px;
+}
+
+.hud {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.hud .item {
+    background: #fff8dc;
+    border: 2px solid #ff6347;
+    padding: 6px 10px;
+    border-radius: 12px;
+    box-shadow: 3px 3px 0 #4a2c00;
+    font-weight: bold;
+}
+
+.order-list {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.order-ingredient {
+    background: #ffa07a;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: white;
+    border: 2px solid #4a2c00;
+}
+/* --- [新增到 style.css 檔案尾部] --- */
+
+#gallery-area {
+    /* 增加邊距和內邊距，使舞台更寬敞 */
+    margin: 40px auto; 
+    padding: 50px; 
+    max-width: 900px; /* 限制寬度，讓它在頁面中央突出 */
+    
+    /* 顏色和邊框：強調舞台的華麗感 */
+    background-color: #fffaf0; /* 奶油白色，像光打在背景上 */
+    border: 10px solid #ffcc00; /* 金色粗邊框 */
+    border-radius: 30px;
+    
+    /* 陰影：製造舞台的厚重感和立體感 */
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4), /* 底部陰影 */
+                inset 0 0 20px rgba(255, 215, 0, 0.5); /* 內部光暈，模擬聚光燈 */
+    
+    text-align: center;
+    /* 過渡效果 */
+    transition: all 0.5s ease-in-out; 
+}
+
+#gallery-area h2 {
+    color: #8b4513; /* 咖啡色標題 */
+    font-size: 2.5em; /* 放大標題 */
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 0px #fff; /* 讓文字更突出 */
+}
+
+/* 作品卡片樣式：讓每個作品像放在展示架上 */
+.saved-creation {
+    background-color: #f0f0f0; /* 淺灰色底座 */
+    border: 5px solid #d3d3d3; /* 灰色邊框 */
+    border-bottom: 10px solid #a9a9a9; /* 加厚底部，像一個底座 */
+    border-radius: 10px;
+    padding: 20px;
+    width: 280px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); /* 提升陰影深度 */
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.saved-creation:hover {
+    transform: translateY(-5px) scale(1.03); /* 滑鼠懸停時微抬起，更像展示品 */
+}
+
+
+.creation-canvas {
+    width: 200px;
+    height: 200px;
+    margin: 10px auto;
+    border: 2px solid gray;
+    border-radius: 10px;
+    position: relative; /* 關鍵：用於定位複製的食材 */
+    overflow: hidden;
+    /* 這裡可以放一個縮小版的嘉頓麵包背景 */
+    background: url('garden_bread.png') center / contain no-repeat;
+}
+
+.saved-creation button {
+    margin-top: 10px;
+    font-size: 0.9em;
+    padding: 8px 15px;
+}
+/* --- [新增到 style.css 檔案尾部] --- */
+
+#leaderboard-area {
+    padding: 30px;
+    background-color: #add8e6; /* 淺藍色，代表獎牌和榮譽 */
+    border: 5px solid #ffcc00; /* 金色邊框 */
+    border-radius: 20px;
+    margin-top: 30px;
+}
+
+#rank-list {
+    list-style: none; /* 移除預設的數字 */
+    padding: 0;
+    margin-top: 20px;
+}
+
+#rank-list li {
+    background-color: #fff;
+    padding: 10px 20px;
+    margin: 8px 0;
+    border-radius: 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #4a2c00;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 2px 2px 0px 0px #008080;
+}
+
+#rank-list li:nth-child(1) { background-color: #ffd700; } /* 金牌 */
+#rank-list li:nth-child(2) { background-color: #c0c0c0; } /* 銀牌 */
+#rank-list li:nth-child(3) { background-color: #cd7f32; } /* 銅牌 */

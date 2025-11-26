@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>童趣麵包坊 - 程式夥伴範例</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <h1>🍞 童趣麵包坊 🖍️</h1>
+        
+        <div id="level-selection">
+            <h2>選擇您的麵包挑戰！</h2>
+            <button id="mode-customer">🧑‍🍳 顧客需求出餐</button>
+            <button id="mode-creation">🎨 自由創作展示</button>
+        </div>
+
+        <div id="game-area" class="hidden">
+            <div id="order-display">
+                </div>
+            
+            <div id="crafting-area">
+                <div id="base-bread">
+                    [麵包圖案將會在這裡顯示]
+                </div>
+            </div>
+
+            <div id="ingredients-area">
+                <h2>食材櫃</h2>
+                <div class="ingredient" data-name="Cheese">🧀 </div>
+                <div class="ingredient" data-name="Tomato">🍅 </div>
+                <div class="ingredient" data-name="Ham">🍖 </div>
+                <div class="ingredient" data-name="Lettuce">🥬 </div>
+                <div class="ingredient" data-name="Chocolate">🍫 </div>
+                <div class="ingredient" data-name="Mushroom">🍄 </div>
+                <div class="ingredient" data-name="lemon">🍋 </div>
+                <div class="ingredient" data-name="strawberry">🍓 </div>
+                <div class="ingredient" data-name="Blueberry">🫐 </div>
+                <div class="ingredient" data-name="grapes">🍇 </div>
+                <div class="ingredient" data-name="peach">🍑 </div>
+                <div class="ingredient" data-name="kiwi">🥝 </div>
+                <div class="ingredient" data-name="banana">🍌 </div>
+                <div class="ingredient" data-name="pineapple">🍍 </div>
+                <div class="ingredient" data-name="sugar">🍬 </div>
+                <div class="ingredient" data-name="honey">🍯 </div>
+                <div class="ingredient" data-name="whipped_cream">🍦 </div>
+                <div class="ingredient" data-name="egg">🥚 </div>
+                <div class="ingredient" data-name="butter">🧈 </div>
+                <div class="ingredient" data-name="peanut_butter">🥜 </div> 
+            
+                <button id="back-to-menu">⬅️ 返回選單</button>
+                <button id="finish-crafting">✅ 完成製作</button>
+            </div>
+        </div>
+        <div id="gallery-area" class="hidden">
+            <h2>✨ 烘焙大師的榮耀舞台 🌟</h2>
+            <div id="creation-list">
+                <p>目前沒有已保存的作品。</p>
+            </div>
+            <button id="back-from-gallery">⬅️ 返回選單</button>
+        </div>
+        </div> 
+    <script src="script.js"></script>
+
+</body>
+</html>
